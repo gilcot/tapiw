@@ -213,6 +213,8 @@ on categories wich are not in use in our installation.</dd>
 <dd>New: many actions/methods synonyms for convenience</dd>
 <dt>0.7.1 2019-11-29</dt>
 <dd>Fix: correct errors in encoding function</dd>
+<dt>0.8.0 2019-11-29</dt>
+<dd>New: addition of more synonyms for -a option</dd>
 </dl>
 
 

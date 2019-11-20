@@ -37,7 +37,7 @@ while getopts "BHa:c:g:hi:k:m:o:r:s:u:v" arg
 do
     case $arg in
         v)
-            echo "tpcli.sh-0.7.1"
+            echo "tpcli.sh-0.8.0"
             exit 0
             ;;
         h)
@@ -259,7 +259,7 @@ case $tp_a in
         _prompt 'tp_i' "Search Pattern" "$2"
         _get "item/$( _mil "$tp_r" )/$tp_i"
         ;;
-    read|get|select|retrieve|show)
+    cat|dir|display|get|list|ls|more|read|retrieve|see|select|show|view)
     #@ https://teampass.readthedocs.io/en/latest/api/api-read/#overview
         tp_a='read'
         case $tp_c in
@@ -320,12 +320,13 @@ case $tp_a in
             ;;
         esac
         ;;
-    info)
+    about|info|stat|what)
     #@ https://teampass.readthedocs.io/en/latest/api/api-special
+        tp_a='info'
         # https://github.com/nilsteampassnet/TeamPass/issues/1665
             _fail "Action/Method not handled yet: $tp_a" 0
         ;;
-    delete|remove)
+    delete|erase|drop|purge|remove|rm|suppress|trash|undo|unlink)
     #@ https://teampass.readthedocs.io/en/latest/api/api-write
         tp_a='delete'
         case $tp_c in
@@ -345,7 +346,7 @@ case $tp_a in
             ;;
         esac
         ;;
-    add|create|put)
+    add|create|insert|link|make|mk|mkdir|new|put|post|touch|write)
     #@ https://teampass.readthedocs.io/en/latest/api/api-write
         tp_a='add'
         case $tp_c in
@@ -417,7 +418,7 @@ case $tp_a in
             ;;
         esac
         ;;
-    update|patch|change|correct|replace|modify)
+    alter|change|correct|edit|modify|redo|patch|replace|update)
     #@ https://teampass.readthedocs.io/en/latest/api/api-write
         tp_a='update'
         case $tp_c in

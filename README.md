@@ -1,15 +1,20 @@
 # Teampass API Wrapper
 
 First, let's answer the questions:
-- what is it?
-- how to use it?
-- how does it involve?
+- [what is it?](#About)
+- [how to set it up?](#Install)
+- [how to use it?](#Usage)
+- [my thoughts on the API](#Limits)
+- [how the things involved](#ChangeLog)
 
-After that, you may find some personal thoughts.
+Let's go.
 
 ## About
 
 This is a POSIX shell script that have very few dependencies.
+Commands used should be available in most distributions, but:
+- AWK
+- JQ
 
 ## Install
 
@@ -34,6 +39,7 @@ TEAMPASS_URL="https://teampass.example.org"
 TEAMPASS_APIKEY="503E-ca1cE"
 EOF
 ```
+Install also the packages listed early according to your distro.
 
 ## Usage
 
@@ -104,6 +110,55 @@ $ tpcli.sh -a delete 7003
 # interactively delete an item
 $ tpcli.sh -a delete
 ```
+
+## Limits
+
+This API is a joke in my humble opinion.
+
+First things, it's not designed like others, in a regular way where you
+would use just `/read/items/` to retrive all items and `/read/item/$Id`
+to retrieve a specific item. OK, it has the original feature I like much:
+`/read/items/$Id1;...;$IdN` That allow the retrieval of many items. But
+why not `/read/items/0` or `/read/items/all` to get'em all?
+
+Same thing for folders: there's no way to retrieve all the list to loop
+over, but you can retrieve many knowing their Ids. Well, but why on earth
+`/read/folder/$Id1;...;$IdN` instead of `/read/folders/$Id1;...;$IdN` ?!? 
+Hold on, that's not all. Why have both `/read/folder/$Id` and
+`/info/folder/$Id` ?!? It's a bit confusing...
+
+Another thing to mention: not all components are usable via the API, or
+is the documentation incomplete?
+
+| component | read? | add? | info? | update? | delete? |
+|-----------|-------|------|-------|---------|---------|
+| item      | Yes   | Yes  | No    | Yes     | Yes     |
+| folder    | Yes   | Yes  | Yes   | Yes     | Yes     |
+| user      | No    | Yes  | No    | No      | No      |
+| role      | No    | No   | No    | No      | No      |
+| file      | Yes   | Yes  | list? | No      | No      |
+| userfolder| Yes   | Yes  | No    | Yes     | Yes     |
+| userpw    | Yes   | Yes  | No    | Yes     | Yes     |
+| category  | No    | No   | No    | No      | No      |
+
+There're the specific `/read/userpw/$Login` and `/read/userfolders/$Login`
+to list items and folders attached to a user. To create and update them,
+you have to use respectively `/add/folder/`/`/add/item/` and
+`/update/folder/$Id`/`/update/item/$Id` That sounds good, and is the rare
+good point I've noticed.
+
+About addition and update, things are not regular either. In some case,
+you must base64-encode each field/part delimited by semicoln. In another
+case, you must base64-encode the whole fields/parts once grouped together.
+I'm puzzled!
+
+Last things. A key is needed to be able to talk to the API, good. But,
+there's no http-authentication, what is bad bad bad. In fact the API key
+give you full access, whereas it would be good that it's restricted by
+some account rights  without reinventing the wheel (another roles matrix
+for the keys.)  
+To give a kind security illusion, there's some IP restriction possible.
+But guess what? It apply to all keys, shit.
 
 ## ChangeLog
 

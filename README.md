@@ -136,7 +136,7 @@ bit useless</dd>
 <dd>New: made a prompt and fail functions and refactorised the code
 (it low the final size while providing a consistant behavieur.) </dd>
 <dt>0.5.0 2019-11-23</dt>
-<dd>New: many synonyms for convenienece, plus both both singular and
+<dd>New: many components synonyms for convenienece, plus both both singular and
 plural forms each time.</dd>
 <dd>New: deletion, addition and update actions now added, after making
 the function able to handle the output (the dedicated part is a bit more
@@ -154,5 +154,8 @@ on categories wich are not in use in our installation.</dd>
 <dd>New: add undocumented reading folder descendant.</dd>
 <dt>0.6.1 2019-11-26</dt>
 <dd>Fix: after test from an old box, add fallback to CSV</dd>
+<dt>0.7.0 2019-11-29</dt>
+<dd>New: many actions/methods synonyms for convenience</dd>
+</dl>
 
 

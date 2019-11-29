@@ -37,7 +37,7 @@ while getopts "BHa:c:g:hi:k:m:o:r:s:u:v" arg
 do
     case $arg in
         v)
-            echo "tpcli.sh-0.6.1"
+            echo "tpcli.sh-0.7.0"
             exit 0
             ;;
         h)
@@ -144,16 +144,13 @@ tp_u="${tp_u}index.php"
 
 # test instance address
 # output should be: {"err":"Something happen ... but what ?"}
-curl $tp_o -o /dev/null -sS $tp_u ||
-    _fail "Network error or bad API EndPoint: $tp_u" 1
+curl $tp_o -o /dev/null -sS "$tp_u" ||
+    _fail "Network error or bad API EndPoint: $tp_u/" 1
 
 # API access key
 _prompt 'tp_k' "API key" "$tp_k" \
     "No option -k and no TEAMPASS_APIKEY in config file, but that's required..."
 tp_k="?apikey=$tp_k"
-
-# URL to method call
-tp_u="$tp_u/$tp_a/"
 
 # Function to concatene Multiple Ids List into one argument
 # $* = requiered space separated items
@@ -177,8 +174,8 @@ _eds() {
 # $1 = requiered the request as method/component/parameter but key
 _get() {
     test $# -lt 1 && return
-    #echo "DEBUG: curl $tp_u$1$tp_k"
-    _json=$( curl -s $tp_o -H 'Content-Type: application/json; charset=utf8' "$tp_u$1$tp_k" | grep -s '^{' )
+    #echo "DEBUG: curl $tp_u/$tp_a/$1$tp_k"
+    _json=$( curl -s $tp_o -H 'Content-Type: application/json; charset=utf8' "$tp_u/$tp_a/$1$tp_k" | grep -s '^{' )
     #echo "DEBUG: $_json"
     if jq --version | awk -F '-' '{print $2}' | grep -qs '1\.[1-4]' # jq-X.Y-Z-misc
     then
@@ -233,10 +230,11 @@ l_i4="${l_tf}Any one can modify"
 l_i9="Item(s) Id(s)"
 l_u0="User Login"
 
-# dispatch per actions and components
+# dispatch per actions then components
 case $tp_a in
-    new_password)
+    new_password|new/password|generate_password|generate/password)
     #@ https://teampass.readthedocs.io/en/latest/api/api-special/#generate-a-password
+        tp_a='new_password'
         _prompt 'tp_1' " integer taken from 4 to 50\nSize/Length" "$1"
         _prompt 'tp_2' "${l_tf}is Secure" "$2"
         _prompt 'tp_3' "${l_tf}has Numerals" "$3"
@@ -254,14 +252,16 @@ case $tp_a in
         _prompt 'tp_4' "Pass Word" "${TEAMPASS_PASSWORD:-$4}"
         _get "$tp_1/$tp_2/$tp_3/$tp_4"
         ;;
-    find)
+    find|search_in_folder|search_in_folders|look_in_folder|look_in_folders)
     #@ https://teampass.readthedocs.io/en/latest/api/api-read/#find-items
+        tp_a='find'
         _prompt 'tp_r' "$l_g9" "$1"
         _prompt 'tp_i' "Search Pattern" "$2"
         _get "item/$( _mil "$tp_r" )/$tp_i"
         ;;
-    read)
+    read|get|select|retrieve|show)
     #@ https://teampass.readthedocs.io/en/latest/api/api-read/#overview
+        tp_a='read'
         case $tp_c in
             folder|folders|group|groups)
             #@ https://teampass.readthedocs.io/en/latest/api/api-read/#read-folders
@@ -290,7 +290,7 @@ case $tp_a in
             #@ https://teampass.readthedocs.io/en/latest/api/api-read/#download-itemss-file-attachments
                 tp_c='files'
                 _prompt 'tp_i' "File Id" "$1"
-                curl -s $tp_o "$tp_u$tp_c/$( echo "$tp_i" | awk '{print $1}' )$tp_k" -o "teampass_attachment_$tp_i"
+                curl -s $tp_o "$tp_u/$tp_a/$tp_c/$( echo "$tp_i" | awk '{print $1}' )$tp_k" -o "teampass_attachment_$tp_i"
             ;;
             folder_descendants|folders_descendants|folders_recursive|subfolders)
             #@ https://teampass.userecho.com/communities/1/topics/106-search-item-by-label-via-api-without-folderid
@@ -316,9 +316,7 @@ case $tp_a in
                 _get "$tp_c/$( echo "$tp_r" | awk '{print $1}' )/$tp_i"
             ;;
             *)
-            #@ https://teampass.readthedocs.io/en/latest/api/api-read/#
-                curl -s $tp_o "$tp_u$tp_c/$( _mil "${tp_i:-$@}" )$tp_k" |
-                    grep '^{' | jq -r '.'
+                _get "$tp_c/$( _mil "${tp_i:-$@}"  )"
             ;;
         esac
         ;;
@@ -327,8 +325,9 @@ case $tp_a in
         # https://github.com/nilsteampassnet/TeamPass/issues/1665
             _fail "Action/Method not handled yet: $tp_a" 0
         ;;
-    delete)
+    delete|remove)
     #@ https://teampass.readthedocs.io/en/latest/api/api-write
+        tp_a='delete'
         case $tp_c in
             folder|folders|group|groups)
             #@ https://teampass.readthedocs.io/en/latest/api/api-write/#delete-a-folder
@@ -342,14 +341,13 @@ case $tp_a in
                 _get "item/$( _mil $tp_i )"
             ;;
             *)
-            #@ https://teampass.readthedocs.io/en/latest/api/api-write/#
-                curl -s $tp_o "$tp_u$tp_c/$( _mil "${tp_i:-$@}" )$tp_k" |
-                    grep '^{' | jq -r '.'
+                _get "$tp_c/$( _mil "${tp_i:-$@}"  )"
             ;;
         esac
         ;;
-    add)
+    add|create|put)
     #@ https://teampass.readthedocs.io/en/latest/api/api-write
+        tp_a='add'
         case $tp_c in
             folder|group)
             #@ https://teampass.readthedocs.io/en/latest/api/api-write/#add-a-folder
@@ -410,18 +408,18 @@ case $tp_a in
             #@ https://teampass.readthedocs.io/en/latest/api/api-write/#add-new-file-attachment
                 _prompt 'tp_i' "$l_i0" "$2"
                 _prompt 'tp_r' "File Path" "$1"
-                curl -X POST -s $tp_o "${tp_u}file$tp_k" \
+                curl -X POST -s $tp_o "$tp_u/$tp_a/file$tp_k" \
                     -F "item_id=$(( tp_i ))" \
                     -F "file=@$tp_r;filename=$( basename "$tp_i" )"
             ;;
             *)
-            #@ 
                 _fail "Unmanaged component for $tp_a: $tp_c" 2
             ;;
         esac
         ;;
-    update)
+    update|patch|change|correct|replace|modify)
     #@ https://teampass.readthedocs.io/en/latest/api/api-write
+        tp_a='update'
         case $tp_c in
             entry|item|pw)
             #@ https://teampass.readthedocs.io/en/latest/api/api-write/#update-an-item
@@ -469,7 +467,6 @@ case $tp_a in
                 _get "folder/$(( tp_0 ))/$( _eds "$tp_1;$(( tp_2 ));$(( tp_5 ));$(( tp_4 ));1" )"
             ;;
             *)
-            #@ 
                 _fail "Unmanaged component for $tp_a: $tp_c" 2
             ;;
         esac

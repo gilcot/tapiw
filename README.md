@@ -156,6 +156,8 @@ on categories wich are not in use in our installation.</dd>
 <dd>Fix: after test from an old box, add fallback to CSV</dd>
 <dt>0.7.0 2019-11-29</dt>
 <dd>New: many actions/methods synonyms for convenience</dd>
+<dt>0.7.1 2019-11-29</dt>
+<dd>Fix: correct errors in encoding function</dd>
 </dl>
 
 

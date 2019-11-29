@@ -37,7 +37,7 @@ while getopts "BHa:c:g:hi:k:m:o:r:s:u:v" arg
 do
     case $arg in
         v)
-            echo "tpcli.sh-0.7.0"
+            echo "tpcli.sh-0.7.1"
             exit 0
             ;;
         h)
@@ -164,10 +164,10 @@ _mil() {
 #@ https://teampass.readthedocs.io/en/latest/api/api-write/#information-about-base64_encoding
 # note that spaces are trimed, in order to allow the use of _prompt for empty fields
 _eds() {
-    printf '%s' "$1" |
-        awk '{gsub(/^[ \t]+/,"",$0); gsub(/[ \t]+$/,"",$0); print $0}' |
+    printf '%s' "$( echo "$1" |
+        awk '{gsub(/^[ \t]+/,"",$0); gsub(/[ \t]+$/,"",$0); print $0}' )" |
         base64 -w 0 |
-        awk '{gsub("+","-",$0); gsub("/","_",$0); print $0}'
+        awk '{gsub("\+","-",$0); gsub("/","_",$0); print $0}'
 }
 
 # Function to make a simple GET query against the TP API EP

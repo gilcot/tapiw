@@ -37,7 +37,7 @@ while getopts "BHa:c:g:hi:k:m:o:r:s:u:v" arg
 do
     case $arg in
         v)
-            echo "tpcli.sh-0.8.0"
+            echo "tpcli.sh-0.9.0"
             exit 0
             ;;
         h)
@@ -184,20 +184,9 @@ _get() {
     else
         _out='@tsv'
     fi
-    if echo "$_json" | grep -qs '^{"\(status\|password\)":'
+    if echo "$_json" | grep -qs '} *}$'
     then
-        if test -z "$tp_H"
-        then
-            echo "$_json" |
-                jq -r "keys | $_out"
-        fi
-        echo "$_json" |
-            jq -r "[ .[] ] | @tsv"
-    elif echo "$_json" | grep -qs '^{"err":'
-    then
-        test -z "$tp_H" && echo "ErRoR"
-        echo "$_json" | jq -r '.err'
-    else
+        # output type 1: {"_id1":{...},"_id2":{...},...,"_idN":{...}}
         if test -z "$tp_H"
         then
             echo "$_json" |
@@ -205,6 +194,21 @@ _get() {
         fi
         echo "$_json" |
             jq -r "(.[] | [ .[] ]) | [ .[] ] | $_out"
+    elif echo "$_json" | grep -qs '^{"err":'
+    then
+        # output type 2 ; special/error case
+        test -z "$tp_H" && echo "ErRoR"
+        echo "$_json" | jq -r '.err'
+    else
+        # output type 2 : {"key1":"value1",...,"keyN":"valueN"}
+        # e.g. for: status, password, etc.
+        if test -z "$tp_H"
+        then
+            echo "$_json" |
+                jq -r "keys | $_out"
+        fi
+        echo "$_json" |
+            jq -r "[ .[] ] | @tsv"
     fi
 }
 
@@ -324,7 +328,15 @@ case $tp_a in
     #@ https://teampass.readthedocs.io/en/latest/api/api-special
         tp_a='info'
         # https://github.com/nilsteampassnet/TeamPass/issues/1665
-            _fail "Action/Method not handled yet: $tp_a" 0
+        case $tp_c in
+            folder|group)
+                _prompt 'tp_1' "$l_g1" "$1"
+                _get "$tp_c/$( _mil "${tp_i:-$@}"  )"
+            ;;
+            complexitity_levels_list|version|*)
+                _get "$tp_c"
+            ;;
+        esac
         ;;
     delete|erase|drop|purge|remove|rm|suppress|trash|undo|unlink)
     #@ https://teampass.readthedocs.io/en/latest/api/api-write

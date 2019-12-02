@@ -215,6 +215,8 @@ on categories wich are not in use in our installation.</dd>
 <dd>Fix: correct errors in encoding function</dd>
 <dt>0.8.0 2019-11-29</dt>
 <dd>New: addition of more synonyms for -a option</dd>
+<dt>0.9.0 2019-12-02</dt>
+<dd>New: handling info method finaly</dd>
 </dl>
 
 

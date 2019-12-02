@@ -8,7 +8,7 @@
 # Command Line Interface to TeamPass API (see README)
 
 # those are needed by the script
-for _i in awk base64 curl grep jq tty
+for _i in awk curl grep jq
 do
     if ! command -v $_i >/dev/null
     then
@@ -37,7 +37,7 @@ while getopts "BHa:c:g:hi:k:m:o:r:s:u:v" arg
 do
     case $arg in
         v)
-            echo "tpcli.sh-0.9.1"
+            echo "tpcli.sh-0.10.0"
             exit 0
             ;;
         h)
@@ -92,7 +92,10 @@ do
 done
 
 # auto-switch to batch if no term
-tty -s || tp_B=1
+if ! command -v tty >/dev/null
+then
+    tty -s || tp_B=1
+fi
 
 # Function to fail with message
 # $1 = optional error message
@@ -164,9 +167,9 @@ _mil() {
 #@ https://teampass.readthedocs.io/en/latest/api/api-write/#information-about-base64_encoding
 # note that spaces are trimed, in order to allow the use of _prompt for empty fields
 _eds() {
-    printf '%s' "$( echo "$1" |
-        awk '{gsub(/^[ \t]+/,"",$0); gsub(/[ \t]+$/,"",$0); print $0}' )" |
-        base64 -w 0 |
+    printf '{"v":"%s"}' "$( echo "$1" |
+    awk '{gsub(/^[ \t]+/,"",$0); gsub(/[ \t]+$/,"",$0); gsub("\"","\\\"",$0);  print $0}' )" |
+        jq -r '.v | @base64' |
         awk '{gsub("\+","-",$0); gsub("/","_",$0); print $0}'
 }
 

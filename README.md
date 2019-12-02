@@ -13,8 +13,10 @@ Let's go.
 
 This is a POSIX shell script that have very few dependencies.
 Commands used should be available in most distributions, but:
-- AWK
-- JQ
+- [\*AWK](https://en.wikipedia.org/wiki/AWK#Versions_and_implementations)
+- [GREP](https://en.wikipedia.org/wiki/Grep#Variations)
+- [cURL](https//curl.haxx.se/)
+- [JQ](https://stedolan.github.io/jq/)
 
 ## Install
 
@@ -219,6 +221,8 @@ on categories wich are not in use in our installation.</dd>
 <dd>New: handling info method finaly</dd>
 <dt>0.9.1 2019-12-02</dt>
 <dd>Fix: ensure the variable content is checked then the stack</dd>
+<dt>0.10.0 2019-12-02</dt>
+<dd>New: remove need of base64 command</dd>
 </dl>
 
 

@@ -217,6 +217,8 @@ on categories wich are not in use in our installation.</dd>
 <dd>New: addition of more synonyms for -a option</dd>
 <dt>0.9.0 2019-12-02</dt>
 <dd>New: handling info method finaly</dd>
+<dt>0.9.1 2019-12-02</dt>
+<dd>Fix: ensure the variable content is checked then the stack</dd>
 </dl>
 
 

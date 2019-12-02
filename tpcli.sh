@@ -37,7 +37,7 @@ while getopts "BHa:c:g:hi:k:m:o:r:s:u:v" arg
 do
     case $arg in
         v)
-            echo "tpcli.sh-0.9.0"
+            echo "tpcli.sh-0.9.1"
             exit 0
             ;;
         h)
@@ -259,8 +259,8 @@ case $tp_a in
     find|search_in_folder|search_in_folders|look_in_folder|look_in_folders)
     #@ https://teampass.readthedocs.io/en/latest/api/api-read/#find-items
         tp_a='find'
-        _prompt 'tp_r' "$l_g9" "$1"
-        _prompt 'tp_i' "Search Pattern" "$2"
+        _prompt 'tp_r' "$l_g9" "${tp_r:-$1}"
+        _prompt 'tp_i' "Search Pattern" "${tp_i:-$2}"
         _get "item/$( _mil "$tp_r" )/$tp_i"
         ;;
     cat|dir|display|get|list|ls|more|read|retrieve|see|select|show|view)
@@ -269,45 +269,44 @@ case $tp_a in
         case $tp_c in
             folder|folders|group|groups)
             #@ https://teampass.readthedocs.io/en/latest/api/api-read/#read-folders
-                _prompt 'tp_i' "$l_g9" "$@"
+                _prompt 'tp_i' "$l_g9" "${tp_i:-$@}"
                 # https://github.com/nilsteampassnet/TeamPass/issues/2307
                 _get "folder/$( _mil "$tp_i" )"
             ;;
             entry|entries|item|items|pw)
             #@ https://teampass.readthedocs.io/en/latest/api/api-read/#read-specific-items
-                _prompt 'tp_i' "$l_i9" "$@"
+                _prompt 'tp_i' "$l_i9" "${tp_i:-$@}"
                 _get "items/$( _mil $tp_i )"
             ;;
             userpw|useritems|userfolders)
             #@ https://teampass.readthedocs.io/en/latest/api/api-read/#read-users-items
             #@ https://teampass.readthedocs.io/en/latest/api/api-read/#read-users-folders
                 test "$tp_c" = 'useritems' && tp_c='userpw'
-                _prompt 'tp_i' "$l_u0" "$1"
+                _prompt 'tp_i' "$l_u0" "${tp_i:-$1}"
                 _get "$tp_c/$( echo "$tp_i" | awk '{print $1}' )"
             ;;
             listattachments|listfiles)
             #@ https://teampass.readthedocs.io/en/latest/api/api-read/#list-itemss-file-attachments
-                _prompt 'tp_i' "$l_i0" "$1"
+                _prompt 'tp_i' "$l_i0" "${tp_i:-$1}"
                 _get "listfiles/$( echo "$tp_i" | awk '{print $1}' )"
             ;;
             files|file|attachment|getfile|getattachment|retrievefile|retrieveattachment)
             #@ https://teampass.readthedocs.io/en/latest/api/api-read/#download-itemss-file-attachments
                 tp_c='files'
-                _prompt 'tp_i' "File Id" "$1"
+                _prompt 'tp_i' "File Id" "${tp_i:$1}"
                 curl -s $tp_o "$tp_u/$tp_a/$tp_c/$( echo "$tp_i" | awk '{print $1}' )$tp_k" -o "teampass_attachment_$tp_i"
             ;;
             folder_descendants|folders_descendants|folders_recursive|subfolders)
             #@ https://teampass.userecho.com/communities/1/topics/106-search-item-by-label-via-api-without-folderid
             #@ https://teampass.userecho.com/communities/1/topics/85-api-list-folder-by-label-or-list-all-folders
-                _prompt 'tp_r' "$l_g0" "$1"
+                _prompt 'tp_r' "$l_g0" "${tp_r:-$1}"
                 tp_r="$( echo "$tp_r" | awk '{print tolower($1)}' )"
                 if "tp_r" = 'title'
                 then
-                    #_prompt 'tp_i' "$l_g1" "$2"
-                    _prompt 'tp_i' "$l_g8" "$2"
+                    _prompt 'tp_i' "$l_g8" "${tp_i:-$2}"
                 elif "tp_r" = 'id'
                 then
-                    _prompt 'tp_i' "$l_g0" "$2"
+                    _prompt 'tp_i' "$l_g0" "${tp_i:-$2}"
                 else
                     _fail "Bad Answer..."
                 fi
@@ -315,8 +314,8 @@ case $tp_a in
             ;;
             category)
             #@ https://github.com/jle64/teampassclient
-                _prompt 'tp_r' "Category Id" "$1"
-                _prompt 'tp_i' "Search Label" "$2"
+                _prompt 'tp_r' "Category Id" "${tp_r:-$1}"
+                _prompt 'tp_i' "Search Label" "${tp_i:-$2}"
                 _get "$tp_c/$( echo "$tp_r" | awk '{print $1}' )/$tp_i"
             ;;
             *)
@@ -344,13 +343,13 @@ case $tp_a in
         case $tp_c in
             folder|folders|group|groups)
             #@ https://teampass.readthedocs.io/en/latest/api/api-write/#delete-a-folder
-                _prompt 'tp_i' "$l_g9" "$@"
+                _prompt 'tp_i' "$l_g9" "${tp_i:-$@}"
                 # https://github.com/nilsteampassnet/TeamPass/issues/2307
                 _get "folder/$( _mil "$tp_i" )"
             ;;
             entry|entries|item|items|pw)
             #@ https://teampass.readthedocs.io/en/latest/api/api-write/#delete-an-item
-                _prompt 'tp_i' "$l_i9" "$@"
+                _prompt 'tp_i' "$l_i9" "${tp_i:-$@}"
                 _get "item/$( _mil $tp_i )"
             ;;
             *)
@@ -419,8 +418,8 @@ case $tp_a in
             ;;
             attachment|file)
             #@ https://teampass.readthedocs.io/en/latest/api/api-write/#add-new-file-attachment
-                _prompt 'tp_i' "$l_i0" "$2"
-                _prompt 'tp_r' "File Path" "$1"
+                _prompt 'tp_i' "$l_i0" "${tp_i:-$2}"
+                _prompt 'tp_r' "File Path" "${tp_r:-$1}"
                 curl -X POST -s $tp_o "$tp_u/$tp_a/file$tp_k" \
                     -F "item_id=$(( tp_i ))" \
                     -F "file=@$tp_r;filename=$( basename "$tp_i" )"
